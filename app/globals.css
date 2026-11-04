@@ -1,26 +1,201 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* 品牌色票：米白 × 深咖啡，赤陶橘為主要點綴，墨綠為輔助 */
+@theme {
+  --color-paper: #fbf7f0;
+  --color-cream: #f3ebde;
+  --color-sand: #e4d5bf;
+  --color-latte: #b39678;
+  --color-coffee: #4a3427;
+  --color-espresso: #2a1c14;
+  --color-terracotta: #c2663d;
+  --color-terracotta-dark: #a4512c;
+  --color-forest: #2f4a3a;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif-tc), "Noto Serif TC", serif;
+  --font-sans: var(--font-sans-tc), "Noto Sans TC", system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* 平滑捲動由 Lenis 負責，這裡不設定 scroll-behavior 以免互相干擾 */
+:root {
+  --ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-silk: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-espresso);
+  letter-spacing: 0.02em;
+}
+
+/* 淡淡的紙張顆粒感 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.18;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .18 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: var(--color-terracotta);
+  color: var(--color-paper);
+}
+
+/* 滾動淡入：較長的時間與柔和的減速曲線，搭配輕微模糊 */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 44px, 0);
+  filter: blur(6px);
+  transition:
+    opacity 1.2s var(--ease-silk),
+    transform 1.6s var(--ease-soft),
+    filter 1.2s var(--ease-silk);
+  transition-delay: var(--delay, 0ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* 圖片遮罩展開 */
+.reveal-mask {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1.6s var(--ease-soft);
+  transition-delay: var(--delay, 0ms);
+}
+.reveal-mask.is-visible {
+  clip-path: inset(0 0 0 0);
+}
+
+/* 首屏進場 */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.animate-rise {
+  animation: rise 1.4s var(--ease-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* 標題逐字由遮罩中升起 */
+@keyframes char-rise {
+  from {
+    transform: translate3d(0, 110%, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+.char-mask {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  vertical-align: bottom;
+}
+.char-mask > span {
+  display: inline-block;
+  animation: char-rise 1.6s var(--ease-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* 首屏背景由近拉遠 */
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.14);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.animate-hero-zoom {
+  animation: hero-zoom 2.8s var(--ease-soft) both;
+}
+
+/* 山嵐：緩慢飄移的霧 */
+@keyframes drift {
+  from {
+    transform: translate3d(-6%, 0, 0);
+  }
+  to {
+    transform: translate3d(6%, -2%, 0);
+  }
+}
+.mist {
+  background:
+    radial-gradient(40% 30% at 20% 70%, rgb(251 247 240 / 0.45), transparent 70%),
+    radial-gradient(35% 25% at 70% 60%, rgb(251 247 240 / 0.35), transparent 70%),
+    radial-gradient(50% 30% at 50% 90%, rgb(251 247 240 / 0.5), transparent 70%);
+  animation: drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes scroll-hint {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+.animate-scroll-hint {
+  animation: scroll-hint 2.2s ease-in-out infinite;
+}
+
+/* 風味輪：手繪線條描邊 */
+.wheel-seg {
+  transform-box: view-box;
+  transform-origin: center;
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
+    fill-opacity 0.35s ease;
+}
+.wheel-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.6s cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+.wheel-on .wheel-line {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .reveal-mask {
+    clip-path: none;
+    transition: none;
+  }
+  .animate-rise,
+  .char-mask > span,
+  .animate-hero-zoom,
+  .mist,
+  .animate-scroll-hint {
+    animation: none;
+  }
+  .wheel-seg,
+  .wheel-line {
+    transition: none;
+  }
 }
