@@ -88,9 +88,9 @@ export default function Home() {
             </Reveal>
             <Reveal delay={100}>
               <h2 className="mt-6 font-serif text-4xl font-bold leading-snug tracking-[0.12em] md:text-5xl">
-                從山上來，
+                從山上，
                 <br />
-                回到你的杯中。
+                來到你的杯中。
               </h2>
             </Reveal>
             <Reveal delay={200}>
